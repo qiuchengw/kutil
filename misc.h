@@ -1,7 +1,6 @@
 #ifndef _KUTIL_MISC_H_
 #define _KUTIL_MISC_H_
 
-#include "macro.h"
 #include <QObject>
 #include <QString>
 #include <QUuid>
@@ -39,7 +38,7 @@ namespace kutil
     }
 
     // 统计文件夹下的文件个数
-    inline void ScanFiles(const QString& dir, const QStringList& filter,
+    inline void scanFiles(const QString& dir, const QStringList& filter,
         bool recursive, std::function<bool(const QString& url)> cb) {
         QDir url(dir);
         if (!url.exists())
@@ -59,7 +58,7 @@ namespace kutil
 
             if (fileInfo.isDir()) {
                 if (recursive) {
-                    ScanFiles(fileInfo.filePath(), filter, recursive, cb);
+                    scanFiles(fileInfo.filePath(), filter, recursive, cb);
                 }
             }
             else if (fileInfo.isFile()) {
@@ -84,11 +83,30 @@ namespace kutil
         WritePreAppend,
         OverWrite,
     };
-    bool writeTextFile(const QString& file_path, const QString& content,
+
+
+    // 一次性读取所有的内容
+    inline QString readTextFile(const QString& file_path, QTextCodec* codec = nullptr) {
+        QString s_all;
+        QFile file(file_path);
+        if (file.open(QFile::ReadOnly)) {
+            QTextStream ts(&file);
+            if (nullptr == codec) {
+                codec = QTextCodec::codecForName("GBK");
+            }
+            ts.setCodec(codec);
+            s_all = ts.readAll();
+            file.close();
+            return s_all;
+        }
+        return QString("");
+    }
+
+    inline bool writeTextFile(const QString& file_path, const QString& content,
         EnumWriteTextMode mode = EnumWriteTextMode::OverWrite, QTextCodec* codec = QTextCodec::codecForName("UTF-8")) {
         QString old_content;
         if (mode != EnumWriteTextMode::OverWrite) {
-            old_content = kutil::ReadTextFile(file_path, codec);
+            old_content = kutil::readTextFile(file_path, codec);
         }
 
         QFile::remove(file_path);
@@ -111,25 +129,8 @@ namespace kutil
         return false;
     }
 
-    // 一次性读取所有的内容
-    inline QString readTextFile(const QString& file_path, QTextCodec* codec = nullptr) {
-        QString s_all;
-        QFile file(file_path);
-        if (file.open(QFile::ReadOnly)){
-            QTextStream ts(&file);
-            if (nullptr == codec){
-                codec = QTextCodec::codecForName("GBK");
-            }
-            ts.setCodec(codec);
-            s_all = ts.readAll();
-            file.close();
-            return s_all;
-        }
-        return QString("");
-    }
-
     // 信号槽连接是否成功
-    inline bool CheckedConnect(QObject* sender, const char* signal,
+    inline bool checkedConnect(QObject* sender, const char* signal,
         QObject* reciver, const char* slot, Qt::ConnectionType typ = Qt::AutoConnection){
         Q_ASSERT(nullptr != sender);
         Q_ASSERT(nullptr != reciver);
@@ -153,19 +154,19 @@ namespace kutil
     }
 
     // 当前日期
-    inline QString CurrentDate() {
+    inline QString currentDate() {
         return QDate::currentDate().toString("yyyyMMdd");
     }
 
     // QVariant的序列化
-    QByteArray SaveVariant(const QVariant& v) {
+    inline QByteArray saveVariant(const QVariant& v) {
         QByteArray ret;
         QDataStream ds(&ret, QIODevice::ReadWrite);
         v.save(ds);
         return ret;
     }
     
-    QVariant LoadVariant(const QByteArray& v) {
+    inline QVariant loadVariant(const QByteArray& v) {
         QDataStream ds(v);
         QVariant ret;
         ret.load(ds);
@@ -173,7 +174,7 @@ namespace kutil
     }
 
     template <typename _Cont, typename T>
-    const T& PrevOrNext(const _Cont& c, const T& current, bool next,
+    const T& prevOrNext(const _Cont& c, const T& current, bool next,
         std::function<bool(const T&)> isFine = [](const T&)->bool { return true;  })
     {
         static T DEF_VAL;
@@ -210,7 +211,7 @@ namespace kutil
     // 12.30  -> 12  (去掉小数点)
     // 123000  ->  12.30 万
     // 1,2300,0000  ->  1.23 亿
-    QString ReadableNum(double f) {
+    inline QString readableNum(double f) {
         auto my_round = [](double x) {
             Q_ASSERT(x <= 10000000); // 防止溢出
             return (long)(x * 100) / 100.f;
@@ -241,7 +242,7 @@ namespace kutil
         return normalFilename(str);
     }
 
-    QString url2Filename(const QString& url) {
+    inline QString url2Filename(const QString& url) {
         // http://xxx/image.php?id=4FBB58096F38&amp;jpg
         // 以上是一个图片的url，这种情况下就不能使用QUrl::name来获取名字
         QString name;
