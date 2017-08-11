@@ -14,24 +14,65 @@ namespace kutil
 {
 
     // 唯一字符串
-    inline QString UuidString()
-    {
-        // 去掉 ｛｝括号
+    // 去掉 ｛｝括号
+    inline QString uuidString() {
         return QUuid::createUuid().toString().remove('{').remove('}');
     }
 
     // 以时间生成可读的编号，适用于调用间隔在1秒以上的使用
     /*
      *	注意！！！
-     *      katie工程使用 KatieReadableUniqueString生成唯一编号
      *      不要使用默认参数，这个函数是故意设计的这么难用的
      *      因为不建议直接调用这个函数，而是在各自的库里在此基础上实现自己的函数
      */
-    QString ReadableUniqueString(const QString& prefix, const QString& postfix /*= ""*/);
+    inline QString readableUniqueString(const QString& prefix, const QString& postfix /*= ""*/) {
+        Q_ASSERT(prefix.length() >= 8); // 
+
+        static int _no = 1; // 递增的
+        QDateTime now = QDateTime::currentDateTime();
+
+        QString s = QString("%1%2%3")
+            .arg(now.toString("yyyyMMdd"))
+            .arg(now.time().msecsSinceStartOfDay() / 1000, 5, 10, QChar('0'))
+            .arg(++_no);
+        return prefix + s + postfix;
+    }
 
     // 统计文件夹下的文件个数
-    void ScanFiles(const QString& dir, const QStringList& filter,
-        bool recursive, std::function<bool(const QString& url)> cb);
+    inline void ScanFiles(const QString& dir, const QStringList& filter,
+        bool recursive, std::function<bool(const QString& url)> cb) {
+        QDir url(dir);
+        if (!url.exists())
+            return;
+
+        url.setFilter(QDir::Dirs | QDir::Files);//除了目录或文件，其他的过滤掉
+        url.setSorting(QDir::DirsFirst);//优先显示目录
+
+        QFileInfoList list = url.entryInfoList();//获取文件信息列表
+        int i = 0;
+        do {
+            QFileInfo fileInfo = list.at(i);
+            if (fileInfo.fileName() == "." | fileInfo.fileName() == ".."){
+                i++;
+                continue;
+            }
+
+            if (fileInfo.isDir()) {
+                if (recursive) {
+                    ScanFiles(fileInfo.filePath(), filter, recursive, cb);
+                }
+            }
+            else if (fileInfo.isFile()) {
+                QString suffix = fileInfo.suffix();
+                if (cb && filter.contains(suffix, Qt::CaseInsensitive)) {
+                    if (!cb(fileInfo.filePath())) {
+                        break;
+                    }
+                }
+            }
+            i++;
+        } while (i < list.size());
+    }
 
     /**
     *	写文本文件
@@ -43,31 +84,60 @@ namespace kutil
         WritePreAppend,
         OverWrite,
     };
-    bool WriteTextFile(const QString& file_path, const QString& content,
-        EnumWriteTextMode mode = EnumWriteTextMode::OverWrite, QTextCodec* codec = QTextCodec::codecForName("UTF-8"));
+    bool writeTextFile(const QString& file_path, const QString& content,
+        EnumWriteTextMode mode = EnumWriteTextMode::OverWrite, QTextCodec* codec = QTextCodec::codecForName("UTF-8")) {
+        QString old_content;
+        if (mode != EnumWriteTextMode::OverWrite) {
+            old_content = kutil::ReadTextFile(file_path, codec);
+        }
+
+        QFile::remove(file_path);
+        QFile file(file_path);
+        if (file.open(QFile::ReadWrite)){
+            QTextStream ts(&file);
+            if (nullptr != codec){
+                ts.setCodec(codec);
+                ts.setGenerateByteOrderMark(true);
+            }
+
+            switch (mode)
+            {
+            case EnumWriteTextMode::OverWrite: ts << content; break;
+            case EnumWriteTextMode::WriteAppend: ts << old_content; ts << content; break;
+            case EnumWriteTextMode::WritePreAppend: ts << content; ts << old_content; break;
+            }
+            return true;
+        }
+        return false;
+    }
 
     // 一次性读取所有的内容
-    QString ReadTextFile(const QString& file_path, QTextCodec* codec = nullptr);
-
-    // 获取资源
-    QString GetResourceFileName(const QString& themeName, const QString& resouce_name);
+    inline QString readTextFile(const QString& file_path, QTextCodec* codec = nullptr) {
+        QString s_all;
+        QFile file(file_path);
+        if (file.open(QFile::ReadOnly)){
+            QTextStream ts(&file);
+            if (nullptr == codec){
+                codec = QTextCodec::codecForName("GBK");
+            }
+            ts.setCodec(codec);
+            s_all = ts.readAll();
+            file.close();
+            return s_all;
+        }
+        return QString("");
+    }
 
     // 信号槽连接是否成功
     inline bool CheckedConnect(QObject* sender, const char* signal,
-        QObject* reciver, const char* slot, Qt::ConnectionType typ = Qt::AutoConnection)
-    {
+        QObject* reciver, const char* slot, Qt::ConnectionType typ = Qt::AutoConnection){
         Q_ASSERT(nullptr != sender);
         Q_ASSERT(nullptr != reciver);
         Q_ASSERT(nullptr != slot);
         Q_ASSERT(nullptr != signal);
 
-        QMetaObject::Connection cn =
-            sender->connect(sender, signal, reciver, slot, typ);
-        if (!cn)
-        {
-            qDebug() << "Signal:" << signal << "\n"
-                << "Slot:" << slot;
-
+        if (!sender->connect(sender, signal, reciver, slot, typ)){
+            qDebug() << "Signal:" << signal << "\n"<< "Slot:" << slot;
             Q_ASSERT(false);
             return false;
         }
@@ -75,8 +145,7 @@ namespace kutil
     }
 
     // 去掉最后n个字符
-    inline QString RemoveLast(const QString &s, int n)
-    {
+    inline QString removeLast(const QString &s, int n){
         if (s.length() <= n)
             return "";
         QString ret = s;
@@ -84,11 +153,24 @@ namespace kutil
     }
 
     // 当前日期
-    QString CurrentDate();
+    inline QString CurrentDate() {
+        return QDate::currentDate().toString("yyyyMMdd");
+    }
 
     // QVariant的序列化
-    QByteArray SaveVariant(const QVariant& v);
-    QVariant LoadVariant(const QByteArray& v);
+    QByteArray SaveVariant(const QVariant& v) {
+        QByteArray ret;
+        QDataStream ds(&ret, QIODevice::ReadWrite);
+        v.save(ds);
+        return ret;
+    }
+    
+    QVariant LoadVariant(const QByteArray& v) {
+        QDataStream ds(v);
+        QVariant ret;
+        ret.load(ds);
+        return ret;
+    }
 
     template <typename _Cont, typename T>
     const T& PrevOrNext(const _Cont& c, const T& current, bool next,
@@ -96,20 +178,16 @@ namespace kutil
     {
         static T DEF_VAL;
 
-        for (auto i = c.begin(); i != c.end(); ++i)
-        {
+        for (auto i = c.begin(); i != c.end(); ++i){
             if (!isFine(*i))
                 continue;
 
-            if (*i == current)
-            {
-                if (!next)
-                {
+            if (*i == current){
+                if (!next){
                     // 上一个
                     return (i == c.begin()) ? c.last() : *(--i);
                 }
-                else
-                {
+                else{
                     // 下一个
                     ++i;
                     return (i == c.end()) ? c.first() : *i;
@@ -118,8 +196,7 @@ namespace kutil
             }
         }
 
-        if (c.size() > 0)
-        {
+        if (c.size() > 0){
             // 默认返回第一个
             return c.front();
         }
@@ -133,7 +210,24 @@ namespace kutil
     // 12.30  -> 12  (去掉小数点)
     // 123000  ->  12.30 万
     // 1,2300,0000  ->  1.23 亿
-    QString ReadableNum(double f);
+    QString ReadableNum(double f) {
+        auto my_round = [](double x) {
+            Q_ASSERT(x <= 10000000); // 防止溢出
+            return (long)(x * 100) / 100.f;
+        };
+
+        const double yi = 10000 * 10000;    // 一亿
+        if (f >= yi){
+            return QString::number(my_round(f / yi), 'f', 2) + QStringLiteral("亿");
+        }
+
+        const double wan = 10000;
+        if (f >= wan){
+            return QString::number(my_round(f / wan), L'f', 2) + QStringLiteral("万");
+        }
+        // 不要小数点
+        return QString::number(f, 'f', 2);
+    }
 
     inline QString normalFilename(const QString& f) {
         QString name = f;
@@ -147,7 +241,26 @@ namespace kutil
         return normalFilename(str);
     }
 
-    QString url2Filename(const QString& url);
+    QString url2Filename(const QString& url) {
+        // http://xxx/image.php?id=4FBB58096F38&amp;jpg
+        // 以上是一个图片的url，这种情况下就不能使用QUrl::name来获取名字
+        QString name;
+        int idx = url.lastIndexOf("/");
+        if (-1 != idx) {
+            // 找到最后一个 / ，其后的应该都可以算名字了
+            name = url.mid(idx + 1);
+        }
+        else {
+            name = url;
+        }
+
+        // 但是要移除掉一些文件系统中不能使用的非法字符
+        name = normalFilename(name);
+        if (!name.isEmpty()) {
+            return name;
+        }
+        return "noname";
+    }
 
 };
 
