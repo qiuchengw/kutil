@@ -8,6 +8,7 @@
 #include <QVariant>
 #include <QDebug>
 #include <QTextCodec>
+#include <QDataStream>
 
 namespace kutil
 {
