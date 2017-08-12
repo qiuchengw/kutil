@@ -117,7 +117,7 @@ public:
         String s_conf;
         if (rapidjson::SaveToString(jv_, s_conf, true, 2))
         {
-            return qui::WriteTextFile(file_path, s_conf);
+            return kutil::writeTextFile(file_path, s_conf);
         }
         return false;
     }

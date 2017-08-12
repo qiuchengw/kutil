@@ -18,6 +18,9 @@ class QStandardItemModel;
 #include <QModelIndex>
 #include <QHeaderView>
 #include <QTableWidget>
+#include <QDesktopWidget>
+#include <QStandardItemModel>
+#include <QClipboard>
 
 namespace kutil
 {
