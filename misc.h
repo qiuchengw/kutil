@@ -12,6 +12,28 @@
 
 namespace kutil
 {
+    inline QString GBK2UTF8(const QString &inStr){
+        QTextCodec *gbk = QTextCodec::codecForName("GB18030");
+        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+        return gbk->toUnicode(gbk->fromUnicode(inStr));              // gbk  convert utf8  
+    }
+
+    inline QString UTF82GBK(const QString &inStr){
+        QTextCodec *gbk = QTextCodec::codecForName("GB18030");
+        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+
+        QString utf2gbk = gbk->toUnicode(inStr.toLocal8Bit());
+        return utf2gbk;
+    }
+
+    inline std::string gbk2utf8(const QString &inStr){
+        return GBK2UTF8(inStr).toStdString();
+    }
+
+    inline QString utf82gbk(const std::string &inStr){
+        QString str = QString::fromStdString(inStr);
+        return UTF82GBK(str);
+    }
 
     // Î¨Ò»×Ö·û´®
     // È¥µô £û£ýÀ¨ºÅ
