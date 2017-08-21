@@ -1,7 +1,7 @@
 #ifndef kconfig_h__
 #define kconfig_h__
 
-#include "deps/rjson/inc.h"
+#include "rjson.h"
 
 #ifndef QT_DLL
 #define QT_DLL
@@ -12,8 +12,8 @@
 #include <QFile>
 #include "misc.h"
 typedef QString String;
-#define _utf8_str(val) StrValue(val.toUtf8().constData(), cfg_->GetAlloctor())
-#define _utf8_p(val) StrValue(val, cfg_->GetAlloctor())
+#define _utf8_str(val) RJsonValue(val.toUtf8().constData(), cfg_->GetAlloctor())
+#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
 
 #else   // c++ pure
 
@@ -25,8 +25,8 @@ typedef QString String;
 #include <vector>
 #include <string>
 typedef std::string String;
-#define _utf8_str(val) StrValue(val.c_str(), cfg_->GetAlloctor())
-#define _utf8_p(val) StrValue(val, cfg_->GetAlloctor())
+#define _utf8_str(val) RJsonValue(val.c_str(), cfg_->GetAlloctor())
+#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
 
 #endif  // QT_DLL
 
@@ -38,16 +38,10 @@ public:
     virtual String GetConfig(bool pretty = true)const = 0;
 };
 
-typedef rapidjson::Document RDoc;
-
 class KConfig;
 class KConfigValue : public IConfig
 {
     friend class KConfig;
-
-    typedef RDoc::Ch MyCh;
-    // typedef rapidjson::Value::StringRefType StrType;
-    typedef rapidjson::Value StrValue;
 
     KConfigValue(const KConfigValue &) = delete;
     KConfigValue &operator=(const KConfigValue &) = delete;
@@ -57,11 +51,11 @@ protected:
     {
         assert(nullptr != c);
 
-        jv_ = new rapidjson::Value(typ);
+        jv_ = new RJsonValue(typ);
         cfg_ = c;
     }
 
-    inline KConfigValue(rapidjson::Value *v, KConfig* c);
+    inline KConfigValue(RJsonValue *v, KConfig* c);
 
     KConfigValue()
     {
@@ -82,7 +76,7 @@ protected:
         }
     }
 
-    inline rapidjson::Value* jval()const
+    inline RJsonValue* jval()const
     {
         return jv_;
     }
@@ -157,7 +151,7 @@ public:
 
         // _typ 不能是value，config
         // GCC/ mingw 需要生成一个临时变量
-        rapidjson::Value _v(val);
+        RJsonValue _v(val);
         return _AddMember_internal(name, _v);
     }
 
@@ -167,10 +161,10 @@ protected:
         return std::find(values_.begin(), values_.end(), val) != values_.end();
     }
 
-    inline KConfigValue& _AddMember_internal(const String& name, rapidjson::Value& v);
+    inline KConfigValue& _AddMember_internal(const String& name, RJsonValue& v);
 protected:
     // real value
-    rapidjson::Value*   jv_ = nullptr;
+    RJsonValue*   jv_ = nullptr;
 
     // 保留所有的value
     std::vector<KConfigValue*> values_;
@@ -183,16 +177,15 @@ private:
 // 对应于rapidjson：：document
 class KConfig : public KConfigValue
 {
-    typedef RDoc::AllocatorType Alloctor;
-    typedef RDoc::Ch MyCh;
-
+    typedef RJsonDocument::AllocatorType Alloctor;
+    
     KConfig(const KConfig &) = delete; 
     KConfig &operator=(const KConfig &) = delete;
 
 public:
     KConfig(const String& d = "{}")
     {
-        jv_ = new rapidjson::Document;
+        jv_ = new RJsonDocument;
         cfg_ = this;
 
 #ifdef QT_DLL
@@ -209,9 +202,9 @@ public:
         jv_ = nullptr;
     }
 
-    inline rapidjson::Document* doc()const
+    inline RJsonDocument* doc()const
     {
-        return (rapidjson::Document*)(jv_);
+        return (RJsonDocument*)(jv_);
     }
 
     inline bool hasError()const
@@ -245,18 +238,18 @@ public:
 #endif
 };
 
-inline KConfigValue::KConfigValue(rapidjson::Value *v, KConfig* c)
+inline KConfigValue::KConfigValue(RJsonValue *v, KConfig* c)
 {
     assert(nullptr != c);
     assert(nullptr != v);
 
-    jv_ = new rapidjson::Value(*v, c->GetAlloctor());
+    jv_ = new RJsonValue(*v, c->GetAlloctor());
     cfg_ = c;
 }
 
 inline KConfigValue* KConfigValue::nodeValue(const QString& node_path)    // path/to/node
 {
-    rapidjson::Value v(*jval(), cfg_->GetAlloctor());
+    RJsonValue v(*jval(), cfg_->GetAlloctor());
     for (const QString& p : node_path.split("/")) {
         QByteArray pm = p.toUtf8();
         if (v.HasMember(pm.constData())) {
@@ -278,7 +271,7 @@ inline KConfig* KConfigValue::NewConfig(const QString& json)
     return v;
 }
 
-inline KConfigValue& KConfigValue::_AddMember_internal(const String& name, rapidjson::Value& v)
+inline KConfigValue& KConfigValue::_AddMember_internal(const String& name, RJsonValue& v)
 {
     jv_->AddMember(_utf8_str(name), v, cfg_->GetAlloctor());
     return *this;
@@ -288,13 +281,13 @@ inline KConfigValue& KConfigValue::AddMember(const String& name, const char* val
 {
     assert(nullptr != val);
         
-    StrValue _v(val, cfg_->GetAlloctor());
+    RJsonValue _v(val, cfg_->GetAlloctor());
     return _AddMember_internal(name, _v);
 }
 
 inline KConfigValue& KConfigValue::AddMember(const String& name, const String& val)
 {
-    StrValue _v(val.toUtf8().constData(), cfg_->GetAlloctor());
+    RJsonValue _v(val.toUtf8().constData(), cfg_->GetAlloctor());
     return _AddMember_internal(name, _v);
 }
 

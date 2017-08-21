@@ -30,19 +30,6 @@
 
 #include <QtCore/qglobal.h>
 
-#ifdef KWIDGET_LIB
-#define KWIDGET_API Q_DECL_EXPORT
-#else
-#define KWIDGET_API Q_DECL_IMPORT
-#endif
-
-#ifdef KFRAME_LIB
-#define KFRAME_API Q_DECL_EXPORT
-#else
-#define KFRAME_API Q_DECL_IMPORT
-#endif
-
-
 // VERIFY ºê
 #if !defined(Q_VERIFY)
 # if !defined(QT_NO_DEBUG)

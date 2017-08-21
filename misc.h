@@ -1,6 +1,8 @@
 #ifndef _KUTIL_MISC_H_
 #define _KUTIL_MISC_H_
 
+#include <functional>
+
 #include <QObject>
 #include <QString>
 #include <QUuid>
@@ -9,18 +11,22 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <QDataStream>
+#include <QDir>
+#include <QTemporaryFile>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 namespace kutil
 {
     inline QString GBK2UTF8(const QString &inStr){
         QTextCodec *gbk = QTextCodec::codecForName("GB18030");
-        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+        // QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
         return gbk->toUnicode(gbk->fromUnicode(inStr));              // gbk  convert utf8  
     }
 
     inline QString UTF82GBK(const QString &inStr){
         QTextCodec *gbk = QTextCodec::codecForName("GB18030");
-        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+        // QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
 
         QString utf2gbk = gbk->toUnicode(inStr.toLocal8Bit());
         return utf2gbk;
@@ -256,7 +262,7 @@ namespace kutil
     inline QString normalFilename(const QString& f) {
         QString name = f;
         return name.replace(QRegExp("[/*?:<>|=&;\"\\\\]"), "")
-            .remove("+").remove("-").remove("/").remove(".");
+            .remove("+").remove("-").remove("/");
     }
 
     inline QString md5Name(const QByteArray& cont) {
@@ -286,6 +292,41 @@ namespace kutil
         return "noname";
     }
 
+	// 读取文件内容，计算sha1，转换为base64编码，并作为文件名存储
+	// 复制到dir文件夹下
+	inline QString copy2Sha1FileName(const QString &file, const QString& dir){
+		QFile fi(file); // 有可能权限问题，导致无法打开
+		if (fi.open(QFile::ReadOnly)) {
+			QByteArray cont_sha1 = QCryptographicHash::hash(fi.readAll(), QCryptographicHash::Sha1);
+			QString cache_file = dir + "/" + md5Name(cont_sha1);
+			if (!QFileInfo::exists(cache_file)) {
+				QFile::copy(file, cache_file);
+			}
+			return cache_file;
+		}
+		return QString::null;
+	}
+
+	// 一个随机的tempfile 文件名，保证文件一定不存在！
+	// 这个实现很慢，因为要创建/删除磁盘文件！
+	inline QString randomTempFileName() {
+		QTemporaryFile file;
+		// 只要文件名，文件要删掉
+		file.setAutoRemove(true);
+		if (file.open()) {
+			return file.fileName();
+		}
+		return QString::null;
+	}
+
+	// 备份文件到系统temp文件夹下，返回备份的文件全路径
+	inline QString backupFile(const QString &origin) {
+		QString name = randomTempFileName();
+		if (QFile::copy(origin, name)) {
+			return name;
+		}
+		return QString::null;
+	}
 };
 
 #endif // _KUTIL_MISC_H_
