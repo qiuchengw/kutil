@@ -365,6 +365,30 @@ namespace kutil
             }
             return true;
         }
+
+		inline bool bring2TopWidget(QWidget* w){
+			if (nullptr == w){
+				Q_ASSERT(false);
+				return false;
+			}
+
+			// 主窗口显示出来
+			QWidget* win = w->window();
+			// 有可能最小化了，先恢复普通状态
+			if (win->windowState() & Qt::WindowMinimized){
+				win->setWindowState((w->windowState() & ~Qt::WindowMinimized) | Qt::WindowActive);
+			}
+
+			// 得显示
+			win->show();
+			// 激活窗口
+			w->activateWindow();
+			// 确保激活了。
+			win->raise();
+
+			return true;
+		}
+
     }
 
     namespace widget {
