@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QTextCodec>
 #include <QDataStream>
+#include <QDir>
+#include <QTemporaryFile>
 
 namespace kutil
 {
@@ -286,6 +288,32 @@ namespace kutil
         return "noname";
     }
 
+	// 读取文件内容，计算sha1，转换为base64编码，并作为文件名存储
+	// 复制到dir文件夹下
+	inline QString copy2Sha1FileName(const QString &file, const QString& dir){
+		QFile fi(file); // 有可能权限问题，导致无法打开
+		if (fi.open(QFile::ReadOnly)) {
+			QByteArray cont_sha1 = QCryptographicHash::hash(fi.readAll(), QCryptographicHash::Sha1);
+			QString cache_file = dir + "/" + md5Name(cont_sha1);
+			if (!QFileInfo::exists(cache_file)) {
+				QFile::copy(file, cache_file);
+			}
+			return cache_file;
+		}
+		return QString::null;
+	}
+
+	inline QString backupFile(const QString &origin) {
+		QTemporaryFile file;
+		file.setAutoRemove(false);
+		if (file.open()) {
+			QString name = file.fileName();
+			if (QFile::copy(origin, name)) {
+				return name;
+			}
+		}
+		return QString::null;
+	}
 };
 
 #endif // _KUTIL_MISC_H_
