@@ -1,6 +1,8 @@
 #ifndef _KUTIL_MISC_H_
 #define _KUTIL_MISC_H_
 
+#include <functional>
+
 #include <QObject>
 #include <QString>
 #include <QUuid>
@@ -11,6 +13,8 @@
 #include <QDataStream>
 #include <QDir>
 #include <QTemporaryFile>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 namespace kutil
 {

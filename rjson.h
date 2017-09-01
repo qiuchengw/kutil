@@ -13,7 +13,7 @@
 typedef rapidjson::Document RJsonDocument;
 typedef rapidjson::Value RJsonValue;
 // typedef rapidjson::Reader RJsonReader;
-// typedef rapidjson::StringBuffer RJsonStringBuffer;
+typedef rapidjson::StringBuffer RJsonStringBuffer;
 // typedef rapidjson::Writer<RJsonStringBuffer> RJsonWriter;
 
 namespace rapidjson
