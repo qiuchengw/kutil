@@ -303,14 +303,20 @@ namespace kutil
 		return QString::null;
 	}
 
-	inline QString backupFile(const QString &origin) {
+	// 一个随机的tempfile 文件名，保证文件一定不存在！
+	inline QString randomTempFileName() {
 		QTemporaryFile file;
-		file.setAutoRemove(false);
 		if (file.open()) {
-			QString name = file.fileName();
-			if (QFile::copy(origin, name)) {
-				return name;
-			}
+			return file.fileName();
+		}
+		return QString::null;
+	}
+
+	// 备份文件到系统temp文件夹下，返回备份的文件全路径
+	inline QString backupFile(const QString &origin) {
+		QString name = randomTempFileName();
+		if (QFile::copy(origin, name)) {
+			return name;
 		}
 		return QString::null;
 	}
