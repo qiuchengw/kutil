@@ -1,6 +1,8 @@
 #ifndef _KUTIL_MISC_H_
 #define _KUTIL_MISC_H_
 
+#include <functional>
+
 #include <QObject>
 #include <QString>
 #include <QUuid>
@@ -11,18 +13,20 @@
 #include <QDataStream>
 #include <QDir>
 #include <QTemporaryFile>
+#include <QDateTime>
+#include <QCryptographicHash>
 
 namespace kutil
 {
     inline QString GBK2UTF8(const QString &inStr){
         QTextCodec *gbk = QTextCodec::codecForName("GB18030");
-        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+        // QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
         return gbk->toUnicode(gbk->fromUnicode(inStr));              // gbk  convert utf8  
     }
 
     inline QString UTF82GBK(const QString &inStr){
         QTextCodec *gbk = QTextCodec::codecForName("GB18030");
-        QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
+        // QTextCodec *utf8 = QTextCodec::codecForName("UTF-8");
 
         QString utf2gbk = gbk->toUnicode(inStr.toLocal8Bit());
         return utf2gbk;
@@ -258,7 +262,7 @@ namespace kutil
     inline QString normalFilename(const QString& f) {
         QString name = f;
         return name.replace(QRegExp("[/*?:<>|=&;\"\\\\]"), "")
-            .remove("+").remove("-").remove("/").remove(".");
+            .remove("+").remove("-").remove("/");
     }
 
     inline QString md5Name(const QByteArray& cont) {
@@ -304,8 +308,11 @@ namespace kutil
 	}
 
 	// 一个随机的tempfile 文件名，保证文件一定不存在！
+	// 这个实现很慢，因为要创建/删除磁盘文件！
 	inline QString randomTempFileName() {
 		QTemporaryFile file;
+		// 只要文件名，文件要删掉
+		file.setAutoRemove(true);
 		if (file.open()) {
 			return file.fileName();
 		}
