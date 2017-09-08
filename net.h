@@ -3,15 +3,26 @@
 
 #pragma once
 
+#include <QSettings>
+
 namespace net {
 
 	/*__declspec(selectany)*/ static QString API_SVR_IP = "";
 
 	inline void setApiServer(const QString& svr) {
 		API_SVR_IP = svr;
+
+		QSettings ss;
+		ss.beginGroup("svr");
+		return ss.setValue("svr", API_SVR_IP);
 	}
 
 	inline QString apiSvr() {
+		if (API_SVR_IP.isEmpty()) {
+			QSettings ss;
+			ss.beginGroup("svr");
+			API_SVR_IP = ss.value("svr").toString();
+		}
 		return API_SVR_IP;
 	}
 
