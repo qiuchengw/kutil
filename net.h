@@ -1,9 +1,11 @@
 ﻿#ifndef kutil_net_h__
 #define kutil_net_h__
 
+#pragma once
+
 namespace net {
 
-	__declspec(selectany) static QString API_SVR_IP = "";
+	/*__declspec(selectany)*/ static QString API_SVR_IP = "";
 
 	inline void setApiServer(const QString& svr) {
 		API_SVR_IP = svr;
