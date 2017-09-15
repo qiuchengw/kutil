@@ -15,6 +15,7 @@
 #include <QTemporaryFile>
 #include <QDateTime>
 #include <QCryptographicHash>
+#include <QFileDialog>
 
 namespace kutil
 {
@@ -327,6 +328,57 @@ namespace kutil
 		}
 		return QString::null;
 	}
+
+	// 读取csv文件
+	inline QList<QStringList> readFromCVS(QTextCodec *codec = nullptr) {
+		QList<QStringList> returnList;
+		auto filelist = QFileDialog::getOpenFileUrls(nullptr, QStringLiteral("打开文件"),
+			QUrl(), "*.csv", 0, QFileDialog::DontUseNativeDialog);
+
+		for (auto url : filelist) {
+			QString file = url.toLocalFile();
+			QFile csvFile(file);
+			if (csvFile.open(QIODevice::ReadWrite)) {
+				if (nullptr == codec)
+					codec = QTextCodec::codecForName("GBK");
+				QTextStream in(&csvFile);
+				in.setCodec(codec);
+
+				while (!in.atEnd()) {
+					QString line = in.readLine();
+					returnList.push_back(line.split(","));
+				}
+			}
+		}
+		return returnList;
+	}
+
+	inline bool readFromCVS(QList<QStringList>& ctn, QTextCodec *codec = nullptr) {
+		QList<QStringList> returnList;
+		auto filelist = QFileDialog::getOpenFileUrls(nullptr, QStringLiteral("打开文件"),
+			QUrl(), "*.csv", 0, QFileDialog::DontUseNativeDialog);
+
+		if (filelist.size() == 0)
+			return false;
+
+		for (auto url : filelist) {
+			QString file = url.toLocalFile();
+			QFile csvFile(file);
+			if (csvFile.open(QIODevice::ReadWrite)) {
+				if (nullptr == codec)
+					codec = QTextCodec::codecForName("GBK");
+				QTextStream in(&csvFile);
+				in.setCodec(codec);
+
+				while (!in.atEnd()) {
+					QString line = in.readLine();
+					ctn.push_back(line.split(","));
+				}
+			}
+		}
+		return true;
+	}
+
 };
 
 #endif // _KUTIL_MISC_H_
