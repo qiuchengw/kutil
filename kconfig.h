@@ -4,32 +4,8 @@
 #include "rjson.h"
 
 #ifndef QT_DLL
-#define QT_DLL
+#include <fstream>
 #endif
-
-#ifdef QT_DLL
-
-#include <QFile>
-#include "misc.h"
-typedef QString String;
-#define _utf8_str(val) RJsonValue(val.toUtf8().constData(), cfg_->GetAlloctor())
-#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
-
-#else   // c++ pure
-
-//  π”√std::string
-#ifndef RAPIDJSON_HAS_STDSTRING
-#   define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
-#include <vector>
-#include <string>
-typedef std::string String;
-#define _utf8_str(val) RJsonValue(val.c_str(), cfg_->GetAlloctor())
-#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
-
-#endif  // QT_DLL
-
 
 class IConfig
 {
@@ -129,9 +105,9 @@ public:
         return v;
     }
 
-    inline KConfigValue* nodeValue(const QString& node_path);    // path/to/node
+    inline KConfigValue* nodeValue(const String& node_path);    // path/to/node
 
-    inline KConfig* NewConfig(const QString& json);
+    inline KConfig* NewConfig(const String& json);
 
     inline KConfigValue& AddMember(const String& name, const char* val);
 
@@ -218,24 +194,33 @@ public:
         return doc()->GetAllocator();
     }
 
-#ifdef QT_DLL 
-    bool ReadFromFile(const String& file_path)
-    {
-        QFile file(file_path);
-        if (file.open(QFile::ReadOnly))
-        {
-            String all = file.readAll();
-            doc()->Parse<0>(all.toUtf8().constData());
-            if (doc()->HasParseError())
-            {
-                doc()->Parse<0>("{}");
-                return false;
-            }
-            return true;
-        }
-        return false;
-    }
+	bool ReadFromFile(const String& file_path) {
+#ifdef QT_DLL
+		QFile file(file_path);
+		if (!file.open(QFile::ReadOnly)) {
+			return false;
+		}
+		String all = file.readAll();
+		doc()->Parse<0>(str.toUtf8().constData());
+#else
+		std::ifstream file(file_path);
+		if (!file.is_open()) {
+			// std::cout << "Error opening file" << std::endl;
+			return false;
+		}
+		//read file
+		std::string str((std::istreambuf_iterator<char>(file)),
+			std::istreambuf_iterator<char>());
+		file.close();
+		doc()->Parse<0>(str.c_str());
 #endif
+
+		if (doc()->HasParseError()) {
+			doc()->Parse<0>("{}");
+			return false;
+		}
+		return true;
+	}
 };
 
 inline KConfigValue::KConfigValue(RJsonValue *v, KConfig* c)
@@ -247,24 +232,27 @@ inline KConfigValue::KConfigValue(RJsonValue *v, KConfig* c)
     cfg_ = c;
 }
 
-inline KConfigValue* KConfigValue::nodeValue(const QString& node_path)    // path/to/node
+inline KConfigValue* KConfigValue::nodeValue(const String& node_path)    // path/to/node
 {
-    RJsonValue v(*jval(), cfg_->GetAlloctor());
-    for (const QString& p : node_path.split("/")) {
-        QByteArray pm = p.toUtf8();
-        if (v.HasMember(pm.constData())) {
-            v = v.operator[](pm.constData());
-        }
-        else {
-            return nullptr;
-        }
-    }
-    KConfigValue* t = new KConfigValue(&v, cfg_);
-    values_.push_back(t);
-    return t;
+	assert(false);
+	return nullptr;
+
+//     RJsonValue v(*jval(), cfg_->GetAlloctor());
+//     for (const QString& p : node_path.split("/")) {
+//         QByteArray pm = p.toUtf8();
+//         if (v.HasMember(pm.constData())) {
+//             v = v.operator[](pm.constData());
+//         }
+//         else {
+//             return nullptr;
+//         }
+//     }
+//     KConfigValue* t = new KConfigValue(&v, cfg_);
+//     values_.push_back(t);
+//     return t;
 }
 
-inline KConfig* KConfigValue::NewConfig(const QString& json)
+inline KConfig* KConfigValue::NewConfig(const String& json)
 {
     KConfig *v = new KConfig(json);
     values_.push_back(v);
@@ -287,8 +275,7 @@ inline KConfigValue& KConfigValue::AddMember(const String& name, const char* val
 
 inline KConfigValue& KConfigValue::AddMember(const String& name, const String& val)
 {
-    RJsonValue _v(val.toUtf8().constData(), cfg_->GetAlloctor());
-    return _AddMember_internal(name, _v);
+    return _AddMember_internal(name, _utf8_str(val));
 }
 
 inline KConfigValue& KConfigValue::AddMember(const String& name, KConfigValue* val)

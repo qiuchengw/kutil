@@ -1,14 +1,34 @@
 ﻿#pragma once
 
 // #include <stdint.h>
-#include <string>
-#include <vector>
-#include <QString>
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
+
+
+#ifdef QT_DLL
+
+#include <QString>
+#include "misc.h"
+typedef QString String;
+#define _utf8_str(val) RJsonValue(val.toUtf8().constData(), cfg_->GetAlloctor())
+#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
+
+#else   // c++ pure
+#include <vector>
+#include <string>
+typedef std::string String;
+#define _utf8_str(val) RJsonValue(val.c_str(), cfg_->GetAlloctor())
+#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
+
+#endif  // QT_DLL
+
+// 使用std::string
+#ifndef RAPIDJSON_HAS_STDSTRING
+#   define RAPIDJSON_HAS_STDSTRING 1
+#endif
 
 typedef rapidjson::Document RJsonDocument;
 typedef rapidjson::Value RJsonValue;
@@ -70,14 +90,18 @@ namespace rapidjson
 		*		    auto_reset_if_fail  如果解析错误，自动设置成解析空文件
 		*
 		**/
-		RJsonDoc(const QString& content = "{}", bool auto_reset_if_fail = true){
+		RJsonDoc(const ::String& content = "{}", bool auto_reset_if_fail = true){
 			MyParse(content, auto_reset_if_fail);
 		}
 
 		// false ： has error
-		bool MyParse(const QString& content, bool auto_reset_if_fail){
+		bool MyParse(const ::String& content, bool auto_reset_if_fail){
+#ifdef QT_DLL
 			QByteArray ar = content.toUtf8();
 			Parse<0>(ar.data());
+#else
+			Parse<0>(content.c_str());
+#endif
 
 			if (HasParseError()){
 				if (auto_reset_if_fail){
