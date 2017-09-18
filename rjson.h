@@ -7,8 +7,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 
-
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
 
 #include <QString>
 #include "misc.h"
@@ -96,7 +95,7 @@ namespace rapidjson
 
 		// false ： has error
 		bool MyParse(const ::String& content, bool auto_reset_if_fail){
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
 			QByteArray ar = content.toUtf8();
 			Parse<0>(ar.data());
 #else
