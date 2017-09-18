@@ -200,7 +200,7 @@ public:
 		if (!file.open(QFile::ReadOnly)) {
 			return false;
 		}
-		String all = file.readAll();
+		String str = file.readAll();
 		doc()->Parse<0>(str.toUtf8().constData());
 #else
 		std::ifstream file(file_path);
