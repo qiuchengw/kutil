@@ -3,7 +3,7 @@
 
 #include "rjson.h"
 
-#ifndef QT_DLL
+#ifndef QT_CORE_LIB
 #include <fstream>
 #endif
 
@@ -164,7 +164,7 @@ public:
         jv_ = new RJsonDocument;
         cfg_ = this;
 
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
         doc()->Parse<0>(d.toUtf8().constData());
 #else
         doc()->Parse<0>(d.c_str());
@@ -195,7 +195,7 @@ public:
     }
 
 	bool ReadFromFile(const String& file_path) {
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
 		QFile file(file_path);
 		if (!file.open(QFile::ReadOnly)) {
 			return false;
