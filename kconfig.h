@@ -261,7 +261,7 @@ inline KConfig* KConfigValue::NewConfig(const String& json)
 
 inline KConfigValue& KConfigValue::_AddMember_internal(const String& name, RJsonValue& v)
 {
-    jv_->AddMember(_utf8_str(name), v, cfg_->GetAlloctor());
+    jv_->AddMember(_utf8_str(name,), v, cfg_->GetAlloctor());
     return *this;
 }
 
@@ -269,13 +269,14 @@ inline KConfigValue& KConfigValue::AddMember(const String& name, const char* val
 {
     assert(nullptr != val);
         
-    RJsonValue _v(val, cfg_->GetAlloctor());
+    _utf8_p(val, _v);
     return _AddMember_internal(name, _v);
 }
 
 inline KConfigValue& KConfigValue::AddMember(const String& name, const String& val)
 {
-    return _AddMember_internal(name, _utf8_str(val));
+    _utf8_str(val, _v);
+    return _AddMember_internal(name, _v);
 }
 
 inline KConfigValue& KConfigValue::AddMember(const String& name, KConfigValue* val)
@@ -295,15 +296,14 @@ KConfigValue& KConfigValue::PushBack(KConfigValue* v)
 template <class _typ>
 KConfigValue& KConfigValue::PushBack(_typ val)
 {
-
-	jv_->PushBack(val, cfg_->GetAlloctor());
+    jv_->PushBack(val, cfg_->GetAlloctor());
 
     return *this;
 }
 
 inline KConfigValue& KConfigValue::PushBack(const String& str)
 {
-    jv_->PushBack(_utf8_str(str), cfg_->GetAlloctor());
+    jv_->PushBack(_utf8_str(str,), cfg_->GetAlloctor());
     return *this;
 }
 

@@ -1,5 +1,11 @@
 ﻿#pragma once
 
+
+// 使用std::string
+#ifndef RAPIDJSON_HAS_STDSTRING
+#   define RAPIDJSON_HAS_STDSTRING 1
+#endif
+
 // #include <stdint.h>
 #include "rapidjson/rapidjson.h"
 #include "rapidjson/document.h"
@@ -8,33 +14,32 @@
 #include "rapidjson/prettywriter.h"
 
 
-#ifdef QT_DLL
-
-#include <QString>
-#include "misc.h"
-typedef QString String;
-#define _utf8_str(val) RJsonValue(val.toUtf8().constData(), cfg_->GetAlloctor())
-#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
-
-#else   // c++ pure
-#include <vector>
-#include <string>
-typedef std::string String;
-#define _utf8_str(val) RJsonValue(val.c_str(), cfg_->GetAlloctor())
-#define _utf8_p(val) RJsonValue(val, cfg_->GetAlloctor())
-
-#endif  // QT_DLL
-
-// 使用std::string
-#ifndef RAPIDJSON_HAS_STDSTRING
-#   define RAPIDJSON_HAS_STDSTRING 1
-#endif
-
 typedef rapidjson::Document RJsonDocument;
 typedef rapidjson::Value RJsonValue;
 // typedef rapidjson::Reader RJsonReader;
 typedef rapidjson::StringBuffer RJsonStringBuffer;
 // typedef rapidjson::Writer<RJsonStringBuffer> RJsonWriter;
+
+
+// _utf8_str/_utf8_p 宏有两种使用形式：
+//		_utf8_str(s, var)	// 生成名字为var的变量
+//		_utf8_str(s, )	// 第二个参数留空，则生成无名临时变量
+#ifdef QT_DLL
+
+#include <QString>
+#include "misc.h"
+typedef QString String;
+#define _utf8_str(val, var) RJsonValue var(val.toUtf8().constData(), cfg_->GetAlloctor())
+#define _utf8_p(val, var) RJsonValue var(val, cfg_->GetAlloctor())
+
+#else   // c++ pure
+#include <vector>
+#include <string>
+typedef std::string String;
+#define _utf8_str(val, var) RJsonValue var(val.c_str(), cfg_->GetAlloctor())
+#define _utf8_p(val, var) RJsonValue var(val, cfg_->GetAlloctor())
+
+#endif  // QT_DLL
 
 namespace rapidjson
 {
