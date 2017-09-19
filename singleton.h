@@ -9,7 +9,7 @@ template<class T>
 class Singleton
 {
 public:
-    static T* Singleton::instance()
+    static T* instance()
     {
         std::call_once(flag_, [](T** inst) {
             *inst = new T;
