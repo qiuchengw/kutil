@@ -26,7 +26,7 @@
 #   endif
 #endif
 
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
 
 #include <QtCore/qglobal.h>
 
