@@ -3,7 +3,7 @@
 
 #include "rjson.h"
 
-#ifndef QT_DLL
+#ifndef QT_CORE_LIB
 #include <fstream>
 #endif
 
@@ -76,17 +76,14 @@ public:
         return "";
     }
 
-#ifdef QT_DLL
-    inline QByteArray GetConfigUtf8() const
-    {
+#ifdef QT_CORE_LIB
+    inline QByteArray GetConfigUtf8() const{
         return GetConfig().toUtf8();
     }
 
-    bool WriteToFile(const String& file_path/*, bool encode_base64 = false*/)
-    {
+    bool WriteToFile(const String& file_path/*, bool encode_base64 = false*/){
         String s_conf;
-        if (rapidjson::SaveToString(jv_, s_conf, true, 2))
-        {
+        if (rapidjson::SaveToString(jv_, s_conf, true, 2)){
             return kutil::writeTextFile(file_path, s_conf);
         }
         return false;
@@ -164,7 +161,7 @@ public:
         jv_ = new RJsonDocument;
         cfg_ = this;
 
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
         doc()->Parse<0>(d.toUtf8().constData());
 #else
         doc()->Parse<0>(d.c_str());
@@ -195,12 +192,12 @@ public:
     }
 
 	bool ReadFromFile(const String& file_path) {
-#ifdef QT_DLL
+#ifdef QT_CORE_LIB
 		QFile file(file_path);
 		if (!file.open(QFile::ReadOnly)) {
 			return false;
 		}
-		String all = file.readAll();
+		String str = file.readAll();
 		doc()->Parse<0>(str.toUtf8().constData());
 #else
 		std::ifstream file(file_path);
