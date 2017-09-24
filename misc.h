@@ -41,22 +41,22 @@ namespace kutil
         return UTF82GBK(str);
     }
 
-    // å”¯ä¸€å­—ç¬¦ä¸²
-    // å»æ‰ ï½›ï½æ‹¬å·
+    // Î¨Ò»×Ö·û´®
+    // È¥µô £û£ıÀ¨ºÅ
     inline QString uuidString() {
         return QUuid::createUuid().toString().remove('{').remove('}');
     }
 
-    // ä»¥æ—¶é—´ç”Ÿæˆå¯è¯»çš„ç¼–å·ï¼Œé€‚ç”¨äºè°ƒç”¨é—´éš”åœ¨1ç§’ä»¥ä¸Šçš„ä½¿ç”¨
+    // ÒÔÊ±¼äÉú³É¿É¶ÁµÄ±àºÅ£¬ÊÊÓÃÓÚµ÷ÓÃ¼ä¸ôÔÚ1ÃëÒÔÉÏµÄÊ¹ÓÃ
     /*
-     *	æ³¨æ„ï¼ï¼ï¼
-     *      ä¸è¦ä½¿ç”¨é»˜è®¤å‚æ•°ï¼Œè¿™ä¸ªå‡½æ•°æ˜¯æ•…æ„è®¾è®¡çš„è¿™ä¹ˆéš¾ç”¨çš„
-     *      å› ä¸ºä¸å»ºè®®ç›´æ¥è°ƒç”¨è¿™ä¸ªå‡½æ•°ï¼Œè€Œæ˜¯åœ¨å„è‡ªçš„åº“é‡Œåœ¨æ­¤åŸºç¡€ä¸Šå®ç°è‡ªå·±çš„å‡½æ•°
+     *	×¢Òâ£¡£¡£¡
+     *      ²»ÒªÊ¹ÓÃÄ¬ÈÏ²ÎÊı£¬Õâ¸öº¯ÊıÊÇ¹ÊÒâÉè¼ÆµÄÕâÃ´ÄÑÓÃµÄ
+     *      ÒòÎª²»½¨ÒéÖ±½Óµ÷ÓÃÕâ¸öº¯Êı£¬¶øÊÇÔÚ¸÷×ÔµÄ¿âÀïÔÚ´Ë»ù´¡ÉÏÊµÏÖ×Ô¼ºµÄº¯Êı
      */
     inline QString readableUniqueString(const QString& prefix, const QString& postfix /*= ""*/) {
         Q_ASSERT(prefix.length() >= 8); // 
 
-        static int _no = 1; // é€’å¢çš„
+        static int _no = 1; // µİÔöµÄ
         QDateTime now = QDateTime::currentDateTime();
 
         QString s = QString("%1%2%3")
@@ -66,17 +66,17 @@ namespace kutil
         return prefix + s + postfix;
     }
 
-    // ç»Ÿè®¡æ–‡ä»¶å¤¹ä¸‹çš„æ–‡ä»¶ä¸ªæ•°
+    // Í³¼ÆÎÄ¼ş¼ĞÏÂµÄÎÄ¼ş¸öÊı
     inline void scanFiles(const QString& dir, const QStringList& filter,
         bool recursive, std::function<bool(const QString& url)> cb) {
         QDir url(dir);
         if (!url.exists())
             return;
 
-        url.setFilter(QDir::Dirs | QDir::Files);//é™¤äº†ç›®å½•æˆ–æ–‡ä»¶ï¼Œå…¶ä»–çš„è¿‡æ»¤æ‰
-        url.setSorting(QDir::DirsFirst);//ä¼˜å…ˆæ˜¾ç¤ºç›®å½•
+        url.setFilter(QDir::Dirs | QDir::Files);//³ıÁËÄ¿Â¼»òÎÄ¼ş£¬ÆäËûµÄ¹ıÂËµô
+        url.setSorting(QDir::DirsFirst);//ÓÅÏÈÏÔÊ¾Ä¿Â¼
 
-        QFileInfoList list = url.entryInfoList();//è·å–æ–‡ä»¶ä¿¡æ¯åˆ—è¡¨
+        QFileInfoList list = url.entryInfoList();//»ñÈ¡ÎÄ¼şĞÅÏ¢ÁĞ±í
         int i = 0;
         do {
             QFileInfo fileInfo = list.at(i);
@@ -103,8 +103,8 @@ namespace kutil
     }
 
     /**
-    *	å†™æ–‡æœ¬æ–‡ä»¶
-    *      ï¼ï¼ï¼ æ”¯æŒæ ¼å¼è®¾ç½®
+    *	Ğ´ÎÄ±¾ÎÄ¼ş
+    *      £¡£¡£¡ Ö§³Ö¸ñÊ½ÉèÖÃ
     *
     **/
     enum EnumWriteTextMode {
@@ -114,7 +114,7 @@ namespace kutil
     };
 
 
-    // ä¸€æ¬¡æ€§è¯»å–æ‰€æœ‰çš„å†…å®¹
+    // Ò»´ÎĞÔ¶ÁÈ¡ËùÓĞµÄÄÚÈİ
     inline QString readTextFile(const QString& file_path, QTextCodec* codec = nullptr) {
         QString s_all;
         QFile file(file_path);
@@ -158,7 +158,7 @@ namespace kutil
         return false;
     }
 
-    // ä¿¡å·æ§½è¿æ¥æ˜¯å¦æˆåŠŸ
+    // ĞÅºÅ²ÛÁ¬½ÓÊÇ·ñ³É¹¦
     inline bool checkedConnect(QObject* sender, const char* signal,
         QObject* reciver, const char* slot, Qt::ConnectionType typ = Qt::AutoConnection){
         Q_ASSERT(nullptr != sender);
@@ -174,7 +174,7 @@ namespace kutil
         return true;
     }
 
-    // å»æ‰æœ€ånä¸ªå­—ç¬¦
+    // È¥µô×îºón¸ö×Ö·û
     inline QString removeLast(const QString &s, int n){
         if (s.length() <= n)
             return "";
@@ -182,12 +182,12 @@ namespace kutil
         return ret.remove(s.length() - n, n);
     }
 
-    // å½“å‰æ—¥æœŸ
+    // µ±Ç°ÈÕÆÚ
     inline QString currentDate() {
         return QDate::currentDate().toString("yyyyMMdd");
     }
 
-    // QVariantçš„åºåˆ—åŒ–
+    // QVariantµÄĞòÁĞ»¯
     inline QByteArray saveVariant(const QVariant& v) {
         QByteArray ret;
         QDataStream ds(&ret, QIODevice::ReadWrite);
@@ -214,11 +214,11 @@ namespace kutil
 
             if (*i == current){
                 if (!next){
-                    // ä¸Šä¸€ä¸ª
+                    // ÉÏÒ»¸ö
                     return (i == c.begin()) ? c.last() : *(--i);
                 }
                 else{
-                    // ä¸‹ä¸€ä¸ª
+                    // ÏÂÒ»¸ö
                     ++i;
                     return (i == c.end()) ? c.first() : *i;
                 }
@@ -227,35 +227,35 @@ namespace kutil
         }
 
         if (c.size() > 0){
-            // é»˜è®¤è¿”å›ç¬¬ä¸€ä¸ª
+            // Ä¬ÈÏ·µ»ØµÚÒ»¸ö
             return c.front();
         }
 
-        // å¦‚æœæ˜¯ç©ºå®¹å™¨/æˆ–è€…æœªæ‰¾åˆ°
+        // Èç¹ûÊÇ¿ÕÈİÆ÷/»òÕßÎ´ÕÒµ½
         Q_ASSERT(false);
         return DEF_VAL;
     }
 
-    // å¤§äºä¸‡çš„ç²¾ç¡®åˆ°å°æ•°ç‚¹åä¸¤ä½ï¼Œå°äºä¸‡çš„å»æ‰å°æ•°ç‚¹
-    // 12.30  -> 12  (å»æ‰å°æ•°ç‚¹)
-    // 123000  ->  12.30 ä¸‡
-    // 1,2300,0000  ->  1.23 äº¿
+    // ´óÓÚÍòµÄ¾«È·µ½Ğ¡ÊıµãºóÁ½Î»£¬Ğ¡ÓÚÍòµÄÈ¥µôĞ¡Êıµã
+    // 12.30  -> 12  (È¥µôĞ¡Êıµã)
+    // 123000  ->  12.30 Íò
+    // 1,2300,0000  ->  1.23 ÒÚ
     inline QString readableNum(double f) {
         auto my_round = [](double x) {
-            Q_ASSERT(x <= 10000000); // é˜²æ­¢æº¢å‡º
+            Q_ASSERT(x <= 10000000); // ·ÀÖ¹Òç³ö
             return (long)(x * 100) / 100.f;
         };
 
-        const double yi = 10000 * 10000;    // ä¸€äº¿
+        const double yi = 10000 * 10000;    // Ò»ÒÚ
         if (f >= yi){
-            return QString::number(my_round(f / yi), 'f', 2) + QStringLiteral("äº¿");
+            return QString::number(my_round(f / yi), 'f', 2) + QStringLiteral("ÒÚ");
         }
 
         const double wan = 10000;
         if (f >= wan){
-            return QString::number(my_round(f / wan), L'f', 2) + QStringLiteral("ä¸‡");
+            return QString::number(my_round(f / wan), L'f', 2) + QStringLiteral("Íò");
         }
-        // ä¸è¦å°æ•°ç‚¹
+        // ²»ÒªĞ¡Êıµã
         return QString::number(f, 'f', 2);
     }
 
@@ -273,18 +273,18 @@ namespace kutil
 
     inline QString url2Filename(const QString& url) {
         // http://xxx/image.php?id=4FBB58096F38&amp;jpg
-        // ä»¥ä¸Šæ˜¯ä¸€ä¸ªå›¾ç‰‡çš„urlï¼Œè¿™ç§æƒ…å†µä¸‹å°±ä¸èƒ½ä½¿ç”¨QUrl::nameæ¥è·å–åå­—
+        // ÒÔÉÏÊÇÒ»¸öÍ¼Æ¬µÄurl£¬ÕâÖÖÇé¿öÏÂ¾Í²»ÄÜÊ¹ÓÃQUrl::nameÀ´»ñÈ¡Ãû×Ö
         QString name;
         int idx = url.lastIndexOf("/");
         if (-1 != idx) {
-            // æ‰¾åˆ°æœ€åä¸€ä¸ª / ï¼Œå…¶åçš„åº”è¯¥éƒ½å¯ä»¥ç®—åå­—äº†
+            // ÕÒµ½×îºóÒ»¸ö / £¬ÆäºóµÄÓ¦¸Ã¶¼¿ÉÒÔËãÃû×ÖÁË
             name = url.mid(idx + 1);
         }
         else {
             name = url;
         }
 
-        // ä½†æ˜¯è¦ç§»é™¤æ‰ä¸€äº›æ–‡ä»¶ç³»ç»Ÿä¸­ä¸èƒ½ä½¿ç”¨çš„éæ³•å­—ç¬¦
+        // µ«ÊÇÒªÒÆ³ıµôÒ»Ğ©ÎÄ¼şÏµÍ³ÖĞ²»ÄÜÊ¹ÓÃµÄ·Ç·¨×Ö·û
         name = normalFilename(name);
         if (!name.isEmpty()) {
             return name;
@@ -292,10 +292,10 @@ namespace kutil
         return "noname";
     }
 
-	// è¯»å–æ–‡ä»¶å†…å®¹ï¼Œè®¡ç®—sha1ï¼Œè½¬æ¢ä¸ºbase64ç¼–ç ï¼Œå¹¶ä½œä¸ºæ–‡ä»¶åå­˜å‚¨
-	// å¤åˆ¶åˆ°diræ–‡ä»¶å¤¹ä¸‹
+	// ¶ÁÈ¡ÎÄ¼şÄÚÈİ£¬¼ÆËãsha1£¬×ª»»Îªbase64±àÂë£¬²¢×÷ÎªÎÄ¼şÃû´æ´¢
+	// ¸´ÖÆµ½dirÎÄ¼ş¼ĞÏÂ
 	inline QString copy2Sha1FileName(const QString &file, const QString& dir){
-		QFile fi(file); // æœ‰å¯èƒ½æƒé™é—®é¢˜ï¼Œå¯¼è‡´æ— æ³•æ‰“å¼€
+		QFile fi(file); // ÓĞ¿ÉÄÜÈ¨ÏŞÎÊÌâ£¬µ¼ÖÂÎŞ·¨´ò¿ª
 		if (fi.open(QFile::ReadOnly)) {
 			QByteArray cont_sha1 = QCryptographicHash::hash(fi.readAll(), QCryptographicHash::Sha1);
 			QString cache_file = dir + "/" + md5Name(cont_sha1);
@@ -307,11 +307,11 @@ namespace kutil
 		return QString::null;
 	}
 
-	// ä¸€ä¸ªéšæœºçš„tempfile æ–‡ä»¶åï¼Œä¿è¯æ–‡ä»¶ä¸€å®šä¸å­˜åœ¨ï¼
-	// è¿™ä¸ªå®ç°å¾ˆæ…¢ï¼Œå› ä¸ºè¦åˆ›å»º/åˆ é™¤ç£ç›˜æ–‡ä»¶ï¼
+	// Ò»¸öËæ»úµÄtempfile ÎÄ¼şÃû£¬±£Ö¤ÎÄ¼şÒ»¶¨²»´æÔÚ£¡
+	// Õâ¸öÊµÏÖºÜÂı£¬ÒòÎªÒª´´½¨/É¾³ı´ÅÅÌÎÄ¼ş£¡
 	inline QString randomTempFileName() {
 		QTemporaryFile file;
-		// åªè¦æ–‡ä»¶åï¼Œæ–‡ä»¶è¦åˆ æ‰
+		// Ö»ÒªÎÄ¼şÃû£¬ÎÄ¼şÒªÉ¾µô
 		file.setAutoRemove(true);
 		if (file.open()) {
 			return file.fileName();
@@ -319,7 +319,7 @@ namespace kutil
 		return QString::null;
 	}
 
-	// å¤‡ä»½æ–‡ä»¶åˆ°ç³»ç»Ÿtempæ–‡ä»¶å¤¹ä¸‹ï¼Œè¿”å›å¤‡ä»½çš„æ–‡ä»¶å…¨è·¯å¾„
+	// ±¸·İÎÄ¼şµ½ÏµÍ³tempÎÄ¼ş¼ĞÏÂ£¬·µ»Ø±¸·İµÄÎÄ¼şÈ«Â·¾¶
 	inline QString backupFile(const QString &origin) {
 		QString name = randomTempFileName();
 		if (QFile::copy(origin, name)) {
