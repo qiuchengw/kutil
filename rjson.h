@@ -13,19 +13,20 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/prettywriter.h"
 
+
 typedef rapidjson::Document RJsonDocument;
 typedef rapidjson::Value RJsonValue;
 // typedef rapidjson::Reader RJsonReader;
 typedef rapidjson::StringBuffer RJsonStringBuffer;
 // typedef rapidjson::Writer<RJsonStringBuffer> RJsonWriter;
 
-#ifdef QT_CORE_LIB
-
-
 
 // _utf8_str/_utf8_p 宏有两种使用形式：
 //		_utf8_str(s, var)	// 生成名字为var的变量
-//		_utf8_str(s, )	// 第二个参数留空，则生成无名临时变量#include <QString>
+//		_utf8_str(s, )	// 第二个参数留空，则生成无名临时变量
+#ifdef QT_CORE_LIB
+
+#include <QString>
 #include "misc.h"
 typedef QString String;
 #define _utf8_str(val, var) RJsonValue var(val.toUtf8().constData(), cfg_->GetAlloctor())
@@ -38,7 +39,7 @@ typedef std::string String;
 #define _utf8_str(val, var) RJsonValue var(val.c_str(), cfg_->GetAlloctor())
 #define _utf8_p(val, var) RJsonValue var(val, cfg_->GetAlloctor())
 
-#endif  // QT_DLL
+#endif  // QT_CORE_LIB
 
 namespace rapidjson
 {

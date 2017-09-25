@@ -76,17 +76,14 @@ public:
         return "";
     }
 
-#ifdef QT_DLL
-    inline QByteArray GetConfigUtf8() const
-    {
+#ifdef QT_CORE_LIB
+    inline QByteArray GetConfigUtf8() const{
         return GetConfig().toUtf8();
     }
 
-    bool WriteToFile(const String& file_path/*, bool encode_base64 = false*/)
-    {
+    bool WriteToFile(const String& file_path/*, bool encode_base64 = false*/){
         String s_conf;
-        if (rapidjson::SaveToString(jv_, s_conf, true, 2))
-        {
+        if (rapidjson::SaveToString(jv_, s_conf, true, 2)){
             return kutil::writeTextFile(file_path, s_conf);
         }
         return false;
