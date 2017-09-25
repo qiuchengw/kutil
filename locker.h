@@ -6,9 +6,9 @@
 #include <QMutex>
 #include "macro.h"
 
-// ±¾ÎÄ¼şÖĞµÄ´úÂëÖ÷ÒªÓÃÓÚ·½±ãµÄÊµÏÖÊı¾İµÄ¶àÏß³Ì°²È«±£»¤
-// ×öµ½Ïß³Ì°²È«±£»¤ÊÇÓĞÒ»¶¨µÄÊ¹ÓÃÏŞÖÆµÄ¡£
-// Çë×¢Òâ½á¹¹/·½·¨µÄÊ¹ÓÃ×¢ÊÍ
+// æœ¬æ–‡ä»¶ä¸­çš„ä»£ç ä¸»è¦ç”¨äºæ–¹ä¾¿çš„å®ç°æ•°æ®çš„å¤šçº¿ç¨‹å®‰å…¨ä¿æŠ¤
+// åšåˆ°çº¿ç¨‹å®‰å…¨ä¿æŠ¤æ˜¯æœ‰ä¸€å®šçš„ä½¿ç”¨é™åˆ¶çš„ã€‚
+// è¯·æ³¨æ„ç»“æ„/æ–¹æ³•çš„ä½¿ç”¨æ³¨é‡Š
 namespace threadsafe
 {
     class QRecursiveLocker : public QMutex
@@ -38,7 +38,7 @@ namespace threadsafe
             }
         }
 
-        // ¸´ÖÆ¹¹Ôì»á×ªÒÆ¿ØÖÆÈ¨
+        // å¤åˆ¶æ„é€ ä¼šè½¬ç§»æ§åˆ¶æƒ
         lock_ptr(const lock_ptr& t)
             :m_(t.m_), c_(t.c_)
         {
@@ -65,7 +65,7 @@ namespace threadsafe
         _C * c_ = nullptr;
     };
 
-    // Òª±£Ö¤Õâ¸ö¶ÔÏóµÄ´´½¨ÊÇÎ¨Ò»µÄ
+    // è¦ä¿è¯è¿™ä¸ªå¯¹è±¡çš„åˆ›å»ºæ˜¯å”¯ä¸€çš„
     template <typename _C>
     class lock_obj
     {
@@ -83,37 +83,37 @@ namespace threadsafe
             return lock_ptr<_C>(const_cast<QRecursiveLocker*>(&m_), const_cast<_C*>(&c_));
         }
 
-        // ÓÃÕâ¸öº¯ÊıÊ¡ÊÂ¶ù£¬µ«ÊÇÈ´±£Ö¤²»ÁËÏß³Ì°²È«
+        // ç”¨è¿™ä¸ªå‡½æ•°çœäº‹å„¿ï¼Œä½†æ˜¯å´ä¿è¯ä¸äº†çº¿ç¨‹å®‰å…¨
         lock_ptr<_C> operator->()const
         {
             return lock();
         }
 
     private:
-        // ¿Éµİ¹éÖØÈëËø£¬·Çµİ¹éËø»áÔì³ÉÊ¹ÓÃÀ§ÄÑ
+        // å¯é€’å½’é‡å…¥é”ï¼Œéé€’å½’é”ä¼šé€ æˆä½¿ç”¨å›°éš¾
         QRecursiveLocker m_;
         
-        // Êı¾İ±£´æ£¬²»ÄÜÊÇÖ¸ÕëÀàĞÍ
+        // æ•°æ®ä¿å­˜ï¼Œä¸èƒ½æ˜¯æŒ‡é’ˆç±»å‹
         _C c_;
     };
 
 // 
-// Ö»ÓĞµÚÈıÖÖÊ¹ÓÃ·½·¨ÊÇÕıÈ·µÄ£º
-//  ÏÈÊ¹ÓÃlock()»ñµÃÁÙÊ±¶ÔÏó£¬È»ºóÔÙÈ¥µ÷ÓÃ
+// åªæœ‰ç¬¬ä¸‰ç§ä½¿ç”¨æ–¹æ³•æ˜¯æ­£ç¡®çš„ï¼š
+//  å…ˆä½¿ç”¨lock()è·å¾—ä¸´æ—¶å¯¹è±¡ï¼Œç„¶åå†å»è°ƒç”¨
 //
-// 1, ÍêÈ«µÈÍ¬ÓÚµÚ¶şÖÖĞ´·¨£ºbegin/end ¾ù²úÉúÒ»´ÎËøºÍÒ»´Î½âËø¡£Ñ­»·ÌåÄÚÍêÈ«²»ÊÜËø±£»¤
+// 1, å®Œå…¨ç­‰åŒäºç¬¬äºŒç§å†™æ³•ï¼šbegin/end å‡äº§ç”Ÿä¸€æ¬¡é”å’Œä¸€æ¬¡è§£é”ã€‚å¾ªç¯ä½“å†…å®Œå…¨ä¸å—é”ä¿æŠ¤
 //     for (const auto& t : obj)    
 //     {
 //         std::cout << t << "    ";
 //     }
 //
-// 2, ÍêÈ«Í¬ÉÏ
+// 2, å®Œå…¨åŒä¸Š
 //     for (auto i = obj->begin(); i != obj->end(); ++i)
 //     {
 //         std::cout << *i << "    ";
 //     }
 //  
-// 3, ÒòÎªÓĞobj.lock() ²úÉúµÄÁÙÊ±¶ÔÏó²»»áÎö¹¹£¬ËùÒÔ²»»á½âËø£¬Ñ­»·ÌåÊÜµ½ËøµÄ±£»¤
+// 3, å› ä¸ºæœ‰obj.lock() äº§ç”Ÿçš„ä¸´æ—¶å¯¹è±¡ä¸ä¼šææ„ï¼Œæ‰€ä»¥ä¸ä¼šè§£é”ï¼Œå¾ªç¯ä½“å—åˆ°é”çš„ä¿æŠ¤
 //     auto& v = obj.lock();
 //     for (auto i = v->begin(); i != v->end(); ++i)
 //     {
@@ -126,28 +126,29 @@ namespace threadsafe
         typedef typename _C::iterator _Itr;
         typedef typename _C::const_iterator _ConsItr;
 
+        typedef lock_obj<_C> _base;
     public:
         typedef _C _Typ;
 
     public:
         _Itr begin()
         {
-            return lock()->begin();
+            return _base::lock()->begin();
         }
 
         _Itr end()
         {
-            return lock()->end();
+            return _base::lock()->end();
         }
 
         _ConsItr begin() const
         {
-            return lock()->cbegin();
+            return _base::lock()->cbegin();
         }
 
         _ConsItr end()const 
         {
-            return lock()->cend();
+            return _base::lock()->cend();
         }
     };
 
