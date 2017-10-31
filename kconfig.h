@@ -3,6 +3,7 @@
 
 #include "rjson.h"
 
+#include <algorithm>
 #ifndef QT_CORE_LIB
 #include <fstream>
 #endif
