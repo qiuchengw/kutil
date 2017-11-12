@@ -14,7 +14,8 @@ namespace net {
 
 		QSettings ss;
 		ss.beginGroup("svr");
-		return ss.setValue("svr", API_SVR_IP);
+		ss.setValue("svr", API_SVR_IP);
+		ss.sync();
 	}
 
 	inline QString apiSvr() {
