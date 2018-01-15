@@ -97,9 +97,9 @@ namespace kutil
         }
 
         // 保存model内的数据为CSV，Execel表格
-        inline void saveToCSV(QStandardItemModel* m) {
+        inline void saveToCSV(QStandardItemModel* m, QWidget* parent = nullptr) {
             if (m->rowCount() != 0){
-                QString filepath = QFileDialog::getSaveFileName(nullptr, QStringLiteral("打开文件"),
+                QString filepath = QFileDialog::getSaveFileName(parent, QStringLiteral("打开文件"),
                     "", "*.csv", 0, QFileDialog::DontUseNativeDialog);
                 QString file = filepath + ".csv";
 
@@ -159,7 +159,7 @@ namespace kutil
             if (0 == tbl->rowCount())
                 return;
 
-            QString filepath = QFileDialog::getSaveFileName(nullptr, QStringLiteral("打开文件"),
+            QString filepath = QFileDialog::getSaveFileName(tbl->window(), QStringLiteral("打开文件"),
                 "", "*.csv", 0, QFileDialog::DontUseNativeDialog);
             if (filepath.isEmpty()){
                 return;
@@ -201,8 +201,8 @@ namespace kutil
         }
 
         //保存QList<QStringList>内的数据为CSV
-        inline bool saveToCSV(QList<QStringList>&content) {
-            QString filepath = QFileDialog::getSaveFileName(nullptr, QStringLiteral("打开文件"),
+        inline bool saveToCSV(QList<QStringList>&content, QWidget* parent = nullptr) {
+            QString filepath = QFileDialog::getSaveFileName(parent, QStringLiteral("打开文件"),
                 "", "*.csv", 0, QFileDialog::DontUseNativeDialog);
             if (filepath.isEmpty()){
                 return false;
