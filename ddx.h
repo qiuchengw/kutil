@@ -90,6 +90,11 @@ struct _double_functor
     double operator()(const QString& o) { return o.toDouble(0); }
 };
 
+struct _longlong_functor
+{
+	long long operator()(const QString& o) { return o.toLongLong(0); }
+};
+
 // int
 template<class _W, typename _V, class _F = _null_functor >
 struct ddx_text_template : public ddx_<_W, _V>
@@ -109,6 +114,7 @@ struct ddx_text_template : public ddx_<_W, _V>
 typedef ddx_text_template<QLineEdit, int, _int_functor> ddx_lineedit_int;
 typedef ddx_text_template<QLineEdit, float, _float_functor> ddx_lineedit_float;
 typedef ddx_text_template<QLineEdit, double, _double_functor> ddx_lineedit_double;
+typedef ddx_text_template<QLineEdit, long long, _longlong_functor> ddx_lineedit_longlong;
 
 // text
 template<class _W>
@@ -327,6 +333,9 @@ private:
 
 #define DDX_LineEdit_Double_g(w, v, g) _ddxmap_()->add(g, new ddx_lineedit_double(w, v))
 #define DDX_LineEdit_Double(w, v) DDX_LineEdit_Double_g(w,v, 0)
+
+#define DDX_LineEdit_Longlong_g(w, v, g) _ddxmap_()->add(g, new ddx_lineedit_longlong(w, v))
+#define DDX_LineEdit_Longlong(w, v) DDX_LineEdit_Longlong_g(w,v, 0)
 
 //////////////////////////////////////////////////////////////////////////
 // text

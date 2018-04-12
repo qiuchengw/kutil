@@ -153,6 +153,7 @@ namespace kutil
             case EnumWriteTextMode::WriteAppend: ts << old_content; ts << content; break;
             case EnumWriteTextMode::WritePreAppend: ts << content; ts << old_content; break;
             }
+			file.close();
             return true;
         }
         return false;
